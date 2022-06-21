@@ -1,7 +1,7 @@
 package com.sensors.web.Sensors.verticles;
 
 import com.sensors.web.Sensors.exceptions.ErrorDetails;
-import com.sensors.web.Sensors.models.Verticle;
+import com.sensors.web.Sensors.models.Temerature;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -17,8 +17,9 @@ import java.util.*;
 public class SensorVerticle extends AbstractVerticle {
   private static final Logger LOG = LoggerFactory.getLogger(SensorVerticle.class);
     private static final int httpPort =Integer.parseInt(System.getenv().getOrDefault("HTTP_PORT","8080"));
-   private final HashMap<String,Verticle> verticals = new HashMap<>();
+   private final HashMap<String, Temerature> verticals = new HashMap<>();
     private final Random random = new Random();
+    private final String path = "/data/:id";
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
@@ -35,11 +36,12 @@ public class SensorVerticle extends AbstractVerticle {
             .put("Message","Some thing went wrong : ( ").toBuffer());
 
       });
-      String path = "/data/:id";
+
      router.get("/data/all").handler(this::getAllTempData);
      router.get(path).handler(this::getTempWithId);
-      router.put(path).handler(this::updateTempById);
-     router.delete(path);
+     router.put(path).handler(this::updateTempById);
+     router.delete(path).handler(this::deleteTemp);
+     router.post("/data/add").handler(this::createTemp);
 
 
 
@@ -51,14 +53,32 @@ public class SensorVerticle extends AbstractVerticle {
       .onFailure(startPromise::fail);
   }
 
+  private void createTemp(RoutingContext routingContext) {
+    Temerature temerature = new Temerature() ;
+    temerature.setTemperature(temerature.getTemperature() + (random.nextGaussian() /2.0d));
+    LOG.info("Adding new  Temperature ");
+    verticals.put(temerature.getUuid(), temerature);
+
+    routingContext.response().putHeader("Content-Type","application/json")
+      .end(temerature.toJsonObject().toBuffer());
+  }
+
+  private void deleteTemp(RoutingContext routingContext) {
+    String tempId = routingContext.pathParam("id");
+     verticals.remove(tempId);
+     LOG.info("Deleting Temperature with this ID {}",tempId);
+     routingContext.response().putHeader("Content-Type","application/json").end("Deleted");
+  }
+
   private void updateTempById(RoutingContext routingContext) {
     String tempId = routingContext.pathParam("id");
     LOG.info("Update Data for {} " , tempId);
     JsonObject json =routingContext.getBodyAsJson();
-    var tempForUpdate = json.mapTo(Verticle.class);
-    verticals.replace(tempId,tempForUpdate);
-   // verticals.put(tempId,tempForUpdate);
-    routingContext.response().end(json.toBuffer());
+    var tempForUpdate = json.mapTo(Temerature.class);
+
+    //verticals.replace(tempId,tempForUpdate);
+    verticals.put(tempId,tempForUpdate);
+    routingContext.response().setStatusCode(201).putHeader("Content-Type","application/json").end(json.toBuffer());
 
 
   }
@@ -94,7 +114,7 @@ public class SensorVerticle extends AbstractVerticle {
 
   private JsonArray createPayload() {
     JsonArray response = new JsonArray();
-    for (Map.Entry<String, Verticle> v: verticals.entrySet() ) {
+    for (Map.Entry<String, Temerature> v: verticals.entrySet() ) {
         response.add(new JsonObject().put("uuid",v.getValue().getUuid())
         .put("temperature",v.getValue().getTemperature())
         .put("timestamp",new Date()));
@@ -103,10 +123,10 @@ public class SensorVerticle extends AbstractVerticle {
   }
 
   private void synchTemperature(Long id) {
-     Verticle verticle = new Verticle() ;
-     verticle.setTemperature(verticle.getTemperature() + (random.nextGaussian() /2.0d));
-    LOG.info("Updating Temperature to {}",verticle.getTemperature());
-    verticals.put(verticle.getUuid(),verticle);
+     Temerature temerature = new Temerature() ;
+     temerature.setTemperature(temerature.getTemperature() + (random.nextGaussian() /2.0d));
+    LOG.info("Updating Temperature to {}", temerature.getTemperature());
+    verticals.put(temerature.getUuid(), temerature);
     vertx.eventBus().publish("Temperature.Updates",createPayload());
   }
 }

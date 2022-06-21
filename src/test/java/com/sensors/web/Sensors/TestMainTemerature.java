@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(VertxExtension.class)
-public class TestMainVerticle {
+public class TestMainTemerature {
 
   @BeforeEach
   void deploy_verticle(Vertx vertx, VertxTestContext testContext) {

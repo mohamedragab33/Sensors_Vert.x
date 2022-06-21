@@ -9,9 +9,9 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Verticle {
+public class Temerature {
   private String uuid= UUID.randomUUID().toString();
-  private double temperature;
+  private double temperature = 21.0;
 
  public JsonObject toJsonObject(){
     return JsonObject.mapFrom(this);

@@ -19,7 +19,7 @@
     <vertx.version>4.3.1</vertx.version>
     <junit-jupiter.version>5.7.0</junit-jupiter.version>
 
-    <main.verticle>com.sensors.web.Sensors.MainVerticle</main.verticle>
+    <main.temerature>com.sensors.web.Sensors.MainVerticle</main.temerature>
     <launcher.class>io.vertx.core.Launcher</launcher.class>
   </properties>
 
@@ -40,6 +40,17 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-pg-client</artifactId>
+      <version>4.3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-pg-client</artifactId>
+      <version>4.3.1</version>
+    </dependency>
+
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-examples</artifactId>
@@ -62,6 +73,7 @@
       <version>1.18.24</version>
       <scope>provided</scope>
     </dependency>
+
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
@@ -99,7 +111,7 @@
                   implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <manifestEntries>
                     <Main-Class>${launcher.class}</Main-Class>
-                    <Main-Verticle>${main.verticle}</Main-Verticle>
+                    <Main-Verticle>${main.temerature}</Main-Verticle>
                   </manifestEntries>
                 </transformer>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
@@ -122,7 +134,7 @@
           <mainClass>io.vertx.core.Launcher</mainClass>
           <arguments>
             <argument>run</argument>
-            <argument>${main.verticle}</argument>
+            <argument>${main.temerature}</argument>
           </arguments>
         </configuration>
       </plugin>
